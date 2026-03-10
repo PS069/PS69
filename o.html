@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> STARV </title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #050810;
+            --nav-bg: rgba(10, 15, 30, 0.9);
+            --card-bg: #111827;
+            --text-color: #f8fafc;
+            --accent-color: #3b82f6;
+            --anime-theme: #ef4444;
+            --shimmer: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f8fafc;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #2563eb;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.3s ease; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            top: 0; left: 0;
+        }
+
+        nav {
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        nav a.active { background: var(--accent-color); color: white; box-shadow: 0 0 15px var(--accent-color); }
+
+        #theme-toggle {
+            position: fixed; bottom: 25px; right: 25px;
+            width: 55px; height: 55px; border-radius: 50%;
+            background: var(--accent-color); color: white;
+            border: none; cursor: pointer; z-index: 1001; font-size: 22px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        }
+
+        section { display: none; min-height: 100vh; padding: 120px 20px 60px; animation: slideUp 0.5s ease; }
+        section.active-section { display: block; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header { text-align: center; margin-bottom: 40px; }
+        .stats-badge { background: rgba(239, 68, 68, 0.2); color: var(--anime-theme); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+
+        .search-box { max-width: 500px; margin: 20px auto; position: relative; }
+        .search-box input {
+            width: 100%; padding: 12px 25px; border-radius: 30px;
+            border: 1px solid rgba(128,128,128,0.3);
+            background: var(--card-bg); color: var(--text-color); outline: none;
+        }
+
+        .grid {
+            max-width: 1200px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;
+        }
+      .rid {
+            max-width: 400px; margin: 0 auto;
+            display:; grid-template-columns: repeat(auto-fit, minmax(300px, 8fr)); gap: 50px;
+        }
+
+        .card {
+            background: var(--card-bg); border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative;
+        }
+
+        .video-container { position: relative; width: 100%; height: 220px; background: #000; overflow: hidden; }
+        video, img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+
+        .play-hint {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.6); color: white; padding: 10px 20px;
+            border-radius: 50px; font-size: 12px; pointer-events: none; opacity: 0; transition: 0.3s;
+        }
+        .card:hover .play-hint { opacity: 1; }
+
+        .info { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-dl { background: var(--anime-theme); color: white; text-decoration: none; padding: 8px 18px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; }
+
+        /* --- Settings/Developer Styles --- */
+        .dev-card {
+            max-width: 500px; margin: 0 auto; background: var(--card-bg);
+            padding: 40px; border-radius: 20px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .dev-card h3 { font-size: 1.8rem; margin-bottom: 10px; color: var(--accent-color); }
+        .dev-card p { margin-bottom: 25px; opacity: 0.8; line-height: 1.6; }
+        
+        .social-links { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .social-item {
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: var(--text-color);
+            background: rgba(255,255,255,0.05); width: 100%;
+            padding: 12px 20px; border-radius: 12px; transition: 0.3s;
+        }
+        .social-item:hover { background: var(--accent-color); transform: scale(1.02); color: white; }
+        .social-item i { font-size: 1.2rem; width: 25px; }
+        
+        .footer-ps { margin-top: 40px; font-size: 0.7rem; opacity: 0.5; letter-spacing: 2px; }
+
+        #lightbox {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center;
+        }
+        #lightbox img { max-width: 85%; max-height: 85%; border-radius: 10px; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div id="particles-js"></div>
+
+    <nav>
+        <a onclick="tab('anime')" id="btn-anime" class="active">Anime</a>
+        <a onclick="tab('videos')" id="btn-videos">Videos</a>
+        <a onclick="tab('images')" id="btn-images">Images</a>
+        <a onclick="tab('settings')" id="btn-settings">Settings</a>
+    </nav>
+
+    <button id="theme-toggle" onclick="toggleTheme()">🌓</button>
+
+    <section id="anime" class="active-section">
+        <div class="header">
+            <span class="stats-badge">LIVE CLIPS: 2</span>
+            <h2>Anime Vault</h2>
+            <div class="search-box">
+                <input type="text" placeholder="Search by title..." onkeyup="search('anime', this.value)">
+            </div>
+        </div>
+        <div class="grid">
+            <div class="card" data-title="Naruto Run">
+                <div class="video-container">
+                    <video loop muted onmouseover="this.play()" onmouseout="this.pause(); this.currentTime=0;" src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+                    <div class="play-hint">Preview Mode</div>
+                </div>
+                <div class="info"><span>Naruto Run</span><a href="https://www.w3schools.com/html/mov_bbb.mp4" class="btn-dl" onclick="forceDownload(event, this)">DOWNLOAD</a></div>
+            </div>
+            <div class="card" data-title="Demon Slayer">
+                <div class="video-container">
+                    <video loop muted onmouseover="this.play()" onmouseout="this.pause(); this.currentTime=0;" src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+                    <div class="play-hint">Preview Mode</div>
+                </div>
+                <div class="info"><span>Demon Slayer</span><a href="https://www.w3schools.com/html/mov_bbb.mp4" class="btn-dl" onclick="forceDownload(event, this)">DOWNLOAD</a></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="videos">
+        <div class="header"><h2>Personal Edits</h2><p>View-only protected content.</p></div>
+        <div class="grid">
+            <div class="card"><video controls controlsList="nodownload" src="IL.mp4"></video><div class="info"><span>Cinematic Edit</span></div></div>
+            <div class="card"><video controls controlsList="nodownload" src="I Tried Government Premium Services! - Counting Unique (720p, h264).mp4"></video><div class="info"><span>Cinematic Edit</span></div></div>
+        </div>
+    </section>
+
+    <section id="images">
+        <div class="header"><h2>Visual Gallery</h2></div>
+        <div class="grid">
+            <div class="card"><img src="https://picsum.photos/id/1018/800/600" class="img-zoom"><div class="info"><span>Photography 01</span></div></div>
+        </div>
+           <div class="rid">
+            <div class="card"><img src="MM.jpg" class="img-zoom"><div class="info"><span> PAKU </span></div></div>
+        </div>
+    </section>
+
+    <section id="settings">
+        <div class="header">
+            <h2>System Settings</h2>
+            <p>Developer & Platform Information</p>
+        </div>
+        
+        <div class="dev-card">
+            <div style="font-size: 50px; margin-bottom: 15px;">🚀</div>
+            <h3>MOHIT SHARMA</h3>
+            <p>Lead Developer & Content Creator. Dedicated to crafting high-quality visual experiences and cinematic anime edits.</p>
+            
+            <div class="social-links">
+                <a href="mailto:ms7807282341@Gmail.com" class="social-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>ms7807282341@Gmail.com</span>
+                </a>
+                <a href="https://youtube.com/@pakusenpai?si=k9_09oqWmn3NHfC7" target="_blank" class="social-item">
+                    <i class="fab fa-youtube"></i>
+                    <span>Paku Senpai</span>
+                </a>
+                <a href="https://instagram.com/mohit_sharma_0609" target="_blank" class="social-item">
+                    <i class="fab fa-instagram"></i>
+                    <span>mohit_sharma_0609</span>
+                </a>
+            </div>
+
+            <div class="footer-ps">© 2024 STARV | PS LIMITED</div>
+        </div>
+    </section>
+
+    <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 80 },
+                "color": { "value": "#3b82f6" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5 },
+                "size": { "value": 3 },
+                "line_linked": { "enable": true, "distance": 150, "color": "#3b82f6", "opacity": 0.2, "width": 1 }
+            }
+        });
+
+        const vids = document.querySelectorAll('video');
+        
+        function tab(id) {
+            vids.forEach(v => v.pause());
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active-section'));
+            document.getElementById(id).classList.add('active-section');
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById('btn-' + id).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function search(sec, val) {
+            let cards = document.querySelectorAll('#'+sec+' .card');
+            cards.forEach(c => {
+                let t = c.getAttribute('data-title')?.toLowerCase() || "";
+                c.style.display = t.includes(val.toLowerCase()) ? "block" : "none";
+            });
+        }
+
+        function toggleTheme() {
+            let t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', t);
+        }
+
+        document.querySelectorAll('.img-zoom').forEach(i => {
+            i.onclick = () => {
+                document.getElementById('lb-img').src = i.src;
+                document.getElementById('lightbox').style.display = 'flex';
+            }
+        });
+
+        function forceDownload(event, anchor) {
+            if (anchor.getAttribute('href') === "#") {
+                event.preventDefault();
+                alert("Invalid Link!");
+                return;
+            }
+            const url = anchor.getAttribute('href');
+            const fileName = url.split('/').pop();
+            anchor.setAttribute('download', fileName);
+        }
+    </script>
+</body>
+</html>
